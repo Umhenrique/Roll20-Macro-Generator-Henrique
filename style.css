@@ -195,11 +195,25 @@ input:checked + .slider:before{
 #macro-peview-header{
 	background-color: #702082;
 	color: white;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 #macro-preview-name{
 	font-family: "Arial";
 	padding: 5px;
-
+}
+#macro-preview-types {
+	display: flex;
+	gap: 10px;
+	font-size: 0.9em;
+	opacity: 0.9;
+}
+#macro-preview-attack-type, #macro-preview-damage-type {
+	font-family: "Arial";
+	padding: 2px 8px;
+	background-color: rgba(255, 255, 255, 0.2);
+	border-radius: 4px;
 }
 #macro-preview-img{
 	width: 90%;
@@ -277,6 +291,13 @@ input:checked + .slider:before{
 		font-size: 24px;
 		height: 50px;
 	}
+	#macro-preview-types {
+		font-size: 1.2em;
+	}
+	
+	#macro-preview-attack-type, #macro-preview-damage-type {
+		padding: 4px 12px;
+	}
 }
 
 @media screen and (max-width: 1010px){
@@ -286,4 +307,95 @@ input:checked + .slider:before{
 	#macro-preview{
 		display: none;
 	}
+}
+
+/* Tooltip styles */
+.tooltip {
+    visibility: hidden;
+    position: absolute;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 5px;
+    border-radius: 6px;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    width: 200px;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.macro-form-div-input:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Save/Load section styles */
+#save-load-section {
+    display: flex;
+    gap: 10px;
+    margin: 0 auto 20px auto;
+    align-items: center;
+    width: 80%;
+    justify-content: center;
+}
+
+#saved-macros {
+    flex: 1;
+    padding: 8px;
+    border-radius: 10px;
+    border: 2px solid white;
+    background-color: transparent;
+    color: white;
+    height: 30px;
+    outline: none;
+}
+
+#saved-macros option {
+    background-color: #772b90;
+    color: white;
+}
+
+#save-macro-btn, #delete-macro-btn {
+    min-width: 120px;
+}
+
+/* Media query for larger screens */
+@media screen and (min-height: 800px) and (min-width: 1380px) {
+    #saved-macros {
+        height: 50px;
+        font-size: 24px;
+    }
+    
+    #save-macro-btn, #delete-macro-btn {
+        min-width: 170px;
+        font-size: 24px;
+        height: 50px;
+    }
+}
+
+/* Error message styles */
+.error-message {
+    color: #ff0000;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+/* Focus styles for better accessibility */
+input:focus, select:focus, button:focus {
+    outline: 2px solid #702082;
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    body {
+        --primary-color: #000000;
+        --secondary-color: #ffffff;
+        --accent-color: #ffff00;
+    }
 }

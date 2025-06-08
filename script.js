@@ -1,4 +1,3 @@
-
 var macroName = document.getElementsByName('macro-name')[0];
 var macroAttribute = document.getElementsByName('macro-attribute')[0];
 var macroImg = document.getElementsByName('macro-img-gif')[0];
@@ -16,11 +15,298 @@ var macroPreviewName = document.querySelector('#macro-preview-name');
 var macroPreviewImg = document.querySelector('#macro-preview-img');
 
 var macroOutput = document.getElementById('macro-output-textarea');
+
+// Cache DOM elements
+const elements = {
+	form: document.getElementById('macro-form'),
+	savedMacros: document.getElementById('saved-macros'),
+	saveMacroBtn: document.getElementById('save-macro-btn'),
+	deleteMacroBtn: document.getElementById('delete-macro-btn'),
+	macroOutput: document.getElementById('macro-output-textarea'),
+	macroPreviewName: document.querySelector('#macro-preview-name'),
+	macroPreviewImg: document.querySelector('#macro-preview-img'),
+	macroPreviewAttackType: document.querySelector('#macro-preview-attack-type'),
+	macroPreviewDamageType: document.querySelector('#macro-preview-damage-type'),
+	square: document.getElementById('macro-preview-square'),
+	row: document.getElementsByClassName('complete-attack-row')[0]
+};
+
+// Input validation patterns
+const validationPatterns = {
+	damage: /^\d+d\d+(\+\d+)?$/,
+	image: /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i
+};
+
+// Debounce function for performance
+function debounce(func, wait) {
+	let timeout;
+	return function executedFunction(...args) {
+		const later = () => {
+			clearTimeout(timeout);
+			func(...args);
+		};
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+	};
+}
+
+// Validate input
+function validateInput(input, pattern) {
+	const errorDiv = input.parentElement.querySelector('.error-message') || 
+					(() => {
+						const div = document.createElement('div');
+						div.className = 'error-message';
+						input.parentElement.appendChild(div);
+						return div;
+					})();
+
+	if (!pattern.test(input.value)) {
+		errorDiv.style.display = 'block';
+		errorDiv.textContent = `Invalid format. Please enter a valid value.`;
+		return false;
+	}
+	errorDiv.style.display = 'none';
+	return true;
+}
+
+// Save macro to localStorage
+function saveMacro() {
+	const macroName = document.getElementsByName('macro-name')[0].value;
+	if (!macroName) {
+		alert('Please enter a name for the macro');
+		return;
+	}
+
+	const formData = new FormData(elements.form);
+	const macroData = {};
+	for (let [key, value] of formData.entries()) {
+		macroData[key] = value;
+	}
+
+	const savedMacros = JSON.parse(localStorage.getItem('savedMacros') || '{}');
+	savedMacros[macroName] = macroData;
+	localStorage.setItem('savedMacros', JSON.stringify(savedMacros));
+	updateSavedMacrosList();
+}
+
+// Load macro from localStorage
+function loadMacro(macroName) {
+	const savedMacros = JSON.parse(localStorage.getItem('savedMacros') || '{}');
+	const macroData = savedMacros[macroName];
+	if (!macroData) return;
+
+	// Reset form first
+	elements.form.reset();
+
+	// Load all form values
+	for (let [key, value] of Object.entries(macroData)) {
+		const input = elements.form.querySelector(`[name="${key}"]`);
+		if (input) {
+			if (input.type === 'checkbox') {
+				input.checked = value === 'on';
+			} else {
+				input.value = value;
+			}
+		}
+	}
+
+	// Update preview name
+	const macroNameInput = document.getElementsByName('macro-name')[0];
+	if (macroNameInput.value) {
+		elements.macroPreviewName.textContent = macroNameInput.value;
+	}
+
+	// Update preview image
+	const macroImgInput = document.getElementsByName('macro-img-gif')[0];
+	if (macroImgInput.value) {
+		elements.macroPreviewImg.src = macroImgInput.value;
+	}
+
+	// Update attack and damage types
+	const attackType = document.getElementsByName('macro-attack-type')[0];
+	const damageType = document.getElementsByName('macro-damage-type')[0];
+	
+	if (attackType.selectedIndex > 0) {
+		elements.macroPreviewAttackType.textContent = attackType.value;
+	}
+	
+	if (damageType.selectedIndex > 0) {
+		elements.macroPreviewDamageType.textContent = damageType.value;
+	}
+
+	// Update attack rows
+	const attkQtd = document.getElementsByName('macro-attk-qtd')[0].value;
+	const currentAttksQtd = document.getElementsByClassName('complete-attack-row').length;
+	const difference = attkQtd - currentAttksQtd;
+
+	if (difference > 0) {
+		for (let i = 0; i < difference; i++) {
+			const newRow = document.createElement('div');
+			newRow.className = 'complete-attack-row';
+			newRow.innerHTML = elements.row.innerHTML;
+			elements.square.appendChild(newRow);
+		}
+	} else if (difference < 0) {
+		const currentAttks = elements.square.querySelectorAll('.complete-attack-row');
+		for (let i = currentAttksQtd - 1; i >= attkQtd; i--) {
+			elements.square.removeChild(currentAttks[i]);
+		}
+	}
+
+	// Generate macro and update preview
+	genMacro();
+	updatePreviewValues();
+
+	// Validate inputs
+	const damageInput = document.getElementsByName('macro-damage')[0];
+	const criticalInput = document.getElementsByName('macro-critical')[0];
+	const imageInput = document.getElementsByName('macro-img-gif')[0];
+
+	validateInput(damageInput, validationPatterns.damage);
+	validateInput(criticalInput, validationPatterns.damage);
+	validateInput(imageInput, validationPatterns.image);
+}
+
+// Delete macro from localStorage
+function deleteMacro() {
+	const macroName = elements.savedMacros.value;
+	if (!macroName) return;
+
+	const savedMacros = JSON.parse(localStorage.getItem('savedMacros') || '{}');
+	delete savedMacros[macroName];
+	localStorage.setItem('savedMacros', JSON.stringify(savedMacros));
+	updateSavedMacrosList();
+}
+
+// Update saved macros dropdown
+function updateSavedMacrosList() {
+	const savedMacros = JSON.parse(localStorage.getItem('savedMacros') || '{}');
+	elements.savedMacros.innerHTML = '<option value="">Select a saved macro</option>';
+	for (let name in savedMacros) {
+		const option = document.createElement('option');
+		option.value = name;
+		option.textContent = name;
+		elements.savedMacros.appendChild(option);
+	}
+}
+
+// Clear form
+function clearForm() {
+	elements.form.reset();
+	elements.macroOutput.value = '';
+	elements.macroPreviewName.textContent = '';
+	elements.macroPreviewImg.src = '';
+	updatePreviewValues();
+}
+
+// Initialize event listeners
+function initializeEventListeners() {
+	// Save/Load functionality
+	elements.saveMacroBtn.addEventListener('click', saveMacro);
+	elements.deleteMacroBtn.addEventListener('click', deleteMacro);
+	elements.savedMacros.addEventListener('change', (e) => loadMacro(e.target.value));
+
+	// Input validation
+	const damageInput = document.getElementsByName('macro-damage')[0];
+	const criticalInput = document.getElementsByName('macro-critical')[0];
+	const imageInput = document.getElementsByName('macro-img-gif')[0];
+
+	damageInput.addEventListener('input', debounce(() => {
+		validateInput(damageInput, validationPatterns.damage);
+	}, 300));
+
+	criticalInput.addEventListener('input', debounce(() => {
+		validateInput(criticalInput, validationPatterns.damage);
+	}, 300));
+
+	imageInput.addEventListener('input', debounce(() => {
+		validateInput(imageInput, validationPatterns.image);
+	}, 300));
+
+	// Form inputs with debounced updates
+	const debouncedGenMacro = debounce(genMacro, 300);
+	const debouncedUpdatePreview = debounce(updatePreviewValues, 300);
+
+	elements.form.querySelectorAll('input, select').forEach(input => {
+		input.addEventListener('change', () => {
+			debouncedGenMacro();
+			debouncedUpdatePreview();
+		});
+		input.addEventListener('input', () => {
+			debouncedGenMacro();
+			debouncedUpdatePreview();
+		});
+	});
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+	initializeEventListeners();
+	updateSavedMacrosList();
+	genMacro();
+	updatePreviewValues();
+	if (macroImg.value != '') {
+		elements.macroPreviewImg.src = macroImg.value;
+	}
+});
+
+// Function to update preview values
+function updatePreviewValues() {
+	const attackRows = document.querySelectorAll('.macro-preview-row-roll');
+	const attribute = macroAttribute.selectedIndex > 0 ? `+@{${macroAttribute.value.toLowerCase()}_mod}` : '';
+	const proficiency = macroProficiency.checked ? '+@{pb}' : '';
+	const globalAttack = macroGlobalAttack.checked ? '+@{global_attack_mod}' : '';
+	const globalDamage = macroGlobalDamage.checked ? '+@{global_damage_mod_roll}' : '';
+
+	// Update attack and damage types
+	const attackType = document.getElementsByName('macro-attack-type')[0];
+	const damageType = document.getElementsByName('macro-damage-type')[0];
+	
+	if (attackType.selectedIndex > 0) {
+		elements.macroPreviewAttackType.textContent = attackType.value;
+	} else {
+		elements.macroPreviewAttackType.textContent = '';
+	}
+	
+	if (damageType.selectedIndex > 0) {
+		elements.macroPreviewDamageType.textContent = damageType.value;
+	} else {
+		elements.macroPreviewDamageType.textContent = '';
+	}
+
+	// Get current damage and critical values
+	const damageValue = document.getElementsByName('macro-damage')[0].value;
+	const criticalValue = document.getElementsByName('macro-critical')[0].value;
+
+	// Update each attack row
+	for (let i = 0; i < attackRows.length; i += 2) {
+		// Attack roll - show just the d20
+		attackRows[i].querySelector('p').textContent = '10';
+		// Advantage roll - show just the d20
+		attackRows[i + 1].querySelector('p').textContent = '20';
+	}
+
+	// Update damage and critical in the last row
+	const lastRow = document.querySelector('.macro-preview-row-2');
+	if (lastRow) {
+		const damageRoll = lastRow.querySelectorAll('.macro-preview-row-roll')[0];
+		const criticalRoll = lastRow.querySelectorAll('.macro-preview-row-roll')[1];
+		if (damageRoll) {
+			damageRoll.querySelector('p').textContent = damageValue;
+		}
+		if (criticalRoll) {
+			criticalRoll.querySelector('p').textContent = criticalValue;
+		}
+	}
+}
+
 // Update the preview name
 macroName.addEventListener('input', function(){
 	if(macroName.value != ''){
 		macroPreviewName.innerHTML = macroName.value;
 	}
+	genMacro();
+	updatePreviewValues();
 })
 
 // Update the preview image/gif 
@@ -28,6 +314,8 @@ macroImg.addEventListener('input', function(){
 	if(macroImg.value != ''){
 		macroPreviewImg.src = macroImg.value;
 	}
+	genMacro();
+	updatePreviewValues();
 })
 
 // Update the number of attaks in preview
@@ -50,8 +338,50 @@ macroAttkQtd.addEventListener('input', function(){
 			square.removeChild(currentAttks[i]);
 		}
 	}
+	genMacro();
+	updatePreviewValues();
 });
 
+// Add event listeners for all other inputs
+macroAttribute.addEventListener('change', function() {
+	genMacro();
+	updatePreviewValues();
+});
+macroCriticalRange.addEventListener('input', function() {
+	genMacro();
+	updatePreviewValues();
+});
+macroDamage.addEventListener('input', function() {
+	genMacro();
+	updatePreviewValues();
+});
+macroCritical.addEventListener('input', function() {
+	genMacro();
+	updatePreviewValues();
+});
+macroProficiency.addEventListener('change', function() {
+	genMacro();
+	updatePreviewValues();
+});
+macroGlobalAttack.addEventListener('change', function() {
+	genMacro();
+	updatePreviewValues();
+});
+macroGlobalDamage.addEventListener('change', function() {
+	genMacro();
+	updatePreviewValues();
+});
+macroEffectType.addEventListener('change', genMacro);
+macroEffectColor.addEventListener('change', genMacro);
+
+// Call updatePreviewValues on initial load
+updatePreviewValues();
+genMacro();
+
+// Update preview image on load
+if (macroImg.value != '') {
+    macroPreviewImg.src = macroImg.value;
+}
 
 // Theme mode
 var themeMode = document.getElementsByName('theme-mode')[0];
@@ -115,7 +445,19 @@ function genMacro(){
 	var effect = "";
 
 	if(macroImg.value != ""){
-		macro += "{{[Image](" + macroImg.value + ")}}";
+		macro += "{{[ignoretext](" + macroImg.value + "#.png)}}";
+	}
+
+	// Add attack type and damage type to macro
+	const attackType = document.getElementsByName('macro-attack-type')[0];
+	const damageType = document.getElementsByName('macro-damage-type')[0];
+	
+	if(attackType.selectedIndex > 0){
+		macro += "{{Attack Type=" + attackType.value + "}}";
+	}
+	
+	if(damageType.selectedIndex > 0){
+		macro += "{{Damage Type=" + damageType.value + "}}";
 	}
 
 	if(macroAttribute.selectedIndex == 1){

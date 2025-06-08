@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 	<link rel="stylesheet" type="text/css" href="style.css">
 	<link rel="icon" href="icons/logoicon.ico">
@@ -14,26 +14,37 @@
 			<div id="header-frame">
 				<h3 class="frame-title">Macro Generator</h3>
 				<div id="theme-mode">
-					<img id="theme-mode-icon" src="icons/sun_icon.png">
+					<img id="theme-mode-icon" src="icons/sun_icon.png" alt="Theme toggle icon">
 					<label class="switch">
-						<input type="checkbox" name="theme-mode"><span class="slider"></span>
+						<input type="checkbox" name="theme-mode" aria-label="Toggle dark mode"><span class="slider"></span>
 					</label>
 				</div>	
 			</div>
 			<br>
 			<div>
+				<!-- Save/Load Section -->
+				<div id="save-load-section">
+					<select id="saved-macros" aria-label="Select saved macro">
+						<option value="">Select a saved macro</option>
+					</select>
+					<button class="macro-btn" id="save-macro-btn" aria-label="Save current macro">Save Macro</button>
+					<button class="macro-btn" id="delete-macro-btn" aria-label="Delete selected macro">Delete Macro</button>
+				</div>
+
 				<form id="macro-form">
 					<!-- Attack name --> 
 					<div class="macro-form-div-input">
-						<input class="macro-input-text" type="text" name="macro-name" placeholder="Attack name">
+						<input class="macro-input-text" type="text" name="macro-name" placeholder="Attack name" aria-label="Attack name">
+						<div class="tooltip">Enter the name of your attack</div>
 					</div>
 					<!-- Damage --> 
 					<div class="macro-form-div-input">
-						<input class="macro-input-text" type="text" name="macro-damage" placeholder="Damage">
+						<input class="macro-input-text" type="text" name="macro-damage" placeholder="8" value="1d8" aria-label="Damage dice">
+						<div class="tooltip">Enter damage dice (e.g., 1d8, 2d6)</div>
 					</div>
 					<!-- Attribute --> 
 					<div class="macro-form-div-input">
-						<select class="macro-input-select" name="macro-attribute">
+						<select class="macro-input-select" name="macro-attribute" aria-label="Select attribute">
 							<option>Select Attribute</option>
 							<option>Strength</option>
 							<option>Dexterity</option>
@@ -42,25 +53,59 @@
 							<option>Wisdom</option>
 							<option>Charisma</option>
 						</select>
+						<div class="tooltip">Select the attribute used for this attack</div>
 					</div>
 					<!-- Critical --> 
 					<div class="macro-form-div-input">
-						<input class="macro-input-text" type="text" name="macro-critical" placeholder="Critical damage">
+						<input class="macro-input-text" type="text" name="macro-critical" placeholder="16" value="2d8" aria-label="Critical damage dice">
+						<div class="tooltip">Enter critical damage dice</div>
 					</div>
 					<!-- Image/gif --> 
 					<div class="macro-form-div-input">
-						<input class="macro-input-text" type="text" name="macro-img-gif" placeholder="Image/gif">
+						<input class="macro-input-text" type="text" name="macro-img-gif" placeholder="Image/gif" value="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWtxdHduaHJrNnJ1dWtpYXc0YmlsdjZ0dWNtcTN1NXI5czV1ODd5ayZlcD12MV9naWZzX3RyZW5kaW5nJmN0PWc/Im6d35ebkCIiGzonjI/200.webp" aria-label="Attack image URL">
+						<div class="tooltip">Enter URL for attack image or gif</div>
+					</div>
+					<!-- Attack type -->
+					<div class="macro-form-div-input">
+						<select class="macro-input-select" name="macro-attack-type" aria-label="Select attack type">
+							<option>Select Attack Type</option>
+							<option>Melee</option>
+							<option>Ranged</option>
+							<option>Spell</option>
+						</select>
+						<div class="tooltip">Select the type of attack</div>
+					</div>
+					<!-- Damage type -->
+					<div class="macro-form-div-input">
+						<select class="macro-input-select" name="macro-damage-type" aria-label="Select damage type">
+							<option>Select Damage Type</option>
+							<option>Slashing</option>
+							<option>Piercing</option>
+							<option>Bludgeoning</option>
+							<option>Fire</option>
+							<option>Cold</option>
+							<option>Lightning</option>
+							<option>Thunder</option>
+							<option>Acid</option>
+							<option>Poison</option>
+							<option>Radiant</option>
+							<option>Necrotic</option>
+							<option>Psychic</option>
+							<option>Force</option>
+						</select>
+						<div class="tooltip">Select the type of damage</div>
 					</div>
 					<!-- Attack quantity --> 
 					<div class="macro-form-div-input">
 						<div class="macro-input-number">
 							<p>Number of attacks</p>
-							<input class="macro-input-text" type="number" name="macro-attk-qtd" placeholder="Attack quantity" value="1" min="0">
+							<input class="macro-input-text" type="number" name="macro-attk-qtd" placeholder="Attack quantity" value="1" min="0" aria-label="Number of attacks">
 						</div>
+						<div class="tooltip">Enter the number of attacks</div>
 					</div>
 					<!-- Effect type --> 
 					<div class="macro-form-div-input">
-						<select class="macro-input-select" name="macro-effect-type">
+						<select class="macro-input-select" name="macro-effect-type" aria-label="Select effect type">
 							<option>Select effect type</option>
 							<option>Beam</option>
 							<option>Bomb</option>
@@ -73,19 +118,21 @@
 							<option>Nova</option>
 							<option>Splatter</option>
 						</select>
+						<div class="tooltip">Select the visual effect type</div>
 					</div>
 					<!-- Proficiency --> 
 					<div class="macro-form-div-input">
 						<div class="macro-input-checkbox">
 							<p>Proficiency</p>
 							<label class="switch">
-								<input type="checkbox" name="macro-pb"><span class="slider"></span>
+								<input type="checkbox" name="macro-pb" aria-label="Toggle proficiency bonus"><span class="slider"></span>
 							</label>
 						</div>
+						<div class="tooltip">Toggle proficiency bonus</div>
 					</div>
 					<!-- Effect color --> 
 					<div class="macro-form-div-input">
-						<select class="macro-input-select" name="macro-effect-color">
+						<select class="macro-input-select" name="macro-effect-color" aria-label="Select effect color">
 							<option>Select effect color</option>
 							<option>Acid</option>
 							<option>Blood</option>
@@ -99,42 +146,45 @@
 							<option>Smoke</option>
 							<option>Water</option>
 						</select>
+						<div class="tooltip">Select the effect color</div>
 					</div>
 					<!-- Global modifier --> 
 					<div class="macro-form-div-input">
 						<div class="macro-input-checkbox">
 							<p>Global attack modifier</p>
 							<label class="switch">
-								<input type="checkbox" name="macro-global-attk-mod"><span class="slider"></span>
+								<input type="checkbox" name="macro-global-attk-mod" aria-label="Toggle global attack modifier"><span class="slider"></span>
 							</label>
 						</div>
+						<div class="tooltip">Toggle global attack modifier</div>
 					</div>
 					<!-- Critical range --> 
 					<div class="macro-form-div-input">
 						<div class="macro-input-number">
 							<p>Critical range</p>
-							<input class="macro-input-text" type="number" name="macro-critical-range" min="0" value="20">
+							<input class="macro-input-text" type="number" name="macro-critical-range" min="0" value="20" aria-label="Critical hit range">
 						</div>
+						<div class="tooltip">Enter the critical hit range</div>
 					</div>
 					<!-- Global damage --> 
 					<div class="macro-form-div-input">
 						<div class="macro-input-checkbox">
 							<p>Global damage modifier</p>
 							<label class="switch">
-								<input type="checkbox" name="macro-global-dmg-mod"><span class="slider"></span>
+								<input type="checkbox" name="macro-global-dmg-mod" aria-label="Toggle global damage modifier"><span class="slider"></span>
 							</label>
 						</div>
+						<div class="tooltip">Toggle global damage modifier</div>
 					</div>
 				</form>	
 				<!-- Macro output --> 
 				<div id="macro-output-div">
-					<textarea id="macro-output-textarea"></textarea>
+					<textarea id="macro-output-textarea" aria-label="Generated macro"></textarea>
 				</div>
 				<!-- Buttons --> 
 				<div id="macro-output-btns">
-					<button class="macro-btn" onClick="genMacro()">Generate macro</button>
-					<button class="macro-btn" onClick="copyMacro()">Copy to clipboard</button>
-					<button class="macro-btn">Clear</button>
+					<button class="macro-btn" onClick="copyMacro()" aria-label="Copy macro to clipboard">Copy to clipboard</button>
+					<button class="macro-btn" onClick="clearForm()" aria-label="Clear form">Clear</button>
 				</div>
 			</div>
 		</section>
@@ -147,28 +197,31 @@
 			<div id="macro-preview-square">
 				<div id="macro-peview-header">
 					<p id="macro-preview-name"></p>
+					<div id="macro-preview-types">
+						<p id="macro-preview-attack-type"></p>
+						<p id="macro-preview-damage-type"></p>
+					</div>
 				</div>
-					<img id="macro-preview-img">
-					<div class="complete-attack-row"> 
-						<div class="macro-preview-row-1">
-							<p>Attack:</p>
-							<div class="macro-preview-row-roll">
-								<p>10</p>
-							</div>
-							<p>Advantage:</p>
-							<div class="macro-preview-row-roll">
-								<p>20</p>
-							</div>
+				<img id="macro-preview-img" alt="Attack preview image">
+				<div class="complete-attack-row"> 
+					<div class="macro-preview-row-1">
+						<p>Attack:</p>
+						<div class="macro-preview-row-roll">
+							<p>10</p>
 						</div>
-						<div class="macro-preview-row-2" style="background-color: white;">
-							<p>Damage:</p>
-							<div class="macro-preview-row-roll">
-								<p>7</p>
-							</div>
-							<p>Critical:</p>
-							<div class="macro-preview-row-roll">
-								<p>15</p>
-							</div>
+						<p>Advantage:</p>
+						<div class="macro-preview-row-roll">
+							<p>20</p>
+						</div>
+					</div>
+					<div class="macro-preview-row-2" style="background-color: white;">
+						<p>Damage:</p>
+						<div class="macro-preview-row-roll">
+							<p>7</p>
+						</div>
+						<p>Critical:</p>
+						<div class="macro-preview-row-roll">
+							<p>15</p>
 						</div>
 					</div>
 				</div>
